@@ -12,12 +12,9 @@ build
 venv
 .git
 .gitignore
-*.md
 training_data
 model
 *.backup
-app.py
-requirements.txt
 spam_detector*.py
 finetune.py
 convert_csv_to_training.py
