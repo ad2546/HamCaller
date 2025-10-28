@@ -23,7 +23,7 @@ chmod +x install.sh run.sh
 **Windows:**
 ```cmd
 git clone https://github.com/ad2546/HamCaller.git
-cd ScamShield
+cd HamCaller
 install.bat
 ```
 
@@ -179,7 +179,7 @@ repeat_penalty: 1.1   # Prevent repetition
 ## 📁 Project Structure
 
 ```
-ScamShield/
+HamCaller/
 ├── model/Modelfile         # Ollama model definition
 ├── training_data/          # Training dataset (185 examples)
 ├── app.py                  # FastAPI web application
