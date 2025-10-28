@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HamCaller - AI Spam Detection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: #000000;
+        }
+
+        .card-dark {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+        }
+
+        .card-darker {
+            background: #050505;
+            border: 1px solid #151515;
+        }
+
+        .phone-shadow {
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        textarea::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        textarea::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        textarea::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 3px;
+        }
+
+        .logo-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-6 md:p-12">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-16 fade-in">
+            <div class="inline-block mb-4">
+                <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl">
+                    <i class="fas fa-phone-slash text-3xl text-white"></i>
+                </div>
+            </div>
+            <h1 class="text-5xl md:text-6xl font-bold logo-gradient mb-4">
+                HamCaller
+            </h1>
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                AI-powered spam call detection. Protect yourself from unwanted calls.
+            </p>
+        </header>
+
+        <div class="grid lg:grid-cols-5 gap-8 items-start">
+            <!-- iPhone Mockup -->
+            <div class="lg:col-span-2 flex justify-center fade-in">
+                <div class="phone-shadow card-dark rounded-[56px] p-4">
+                    <div class="bg-black rounded-[48px] overflow-hidden w-[340px] h-[680px] relative border border-gray-900">
+                        <!-- Dynamic Island -->
+                        <div class="absolute top-6 left-1/2 -translate-x-1/2 w-32 h-8 bg-black rounded-full z-20 flex items-center justify-center border border-gray-900">
+                            <div class="w-16 h-3 bg-gray-950 rounded-full"></div>
+                        </div>
+
+                        <!-- Status Bar -->
+                        <div class="relative pt-6 px-6 pb-2 flex justify-between text-xs text-gray-500 font-medium">
+                            <div id="time">12:00</div>
+                            <div class="flex gap-1 items-center">
+                                <i class="fas fa-signal text-xs"></i>
+                                <i class="fas fa-wifi text-xs"></i>
+                                <i class="fas fa-battery-full text-xs"></i>
+                            </div>
+                        </div>
+
+                        <!-- Call Screen -->
+                        <div class="px-8 h-full flex flex-col justify-between pt-16 pb-12">
+                            <!-- Caller Info -->
+                            <div class="text-center">
+                                <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl">
+                                    <i class="fas fa-phone text-3xl text-white"></i>
+                                </div>
+                                <div class="text-white text-3xl font-semibold mb-2">Unknown</div>
+                                <div class="text-gray-400 text-base">+1 (555) 123-4567</div>
+                                <div class="mt-3 text-gray-600 text-sm">Incoming Call</div>
+                            </div>
+
+                            <!-- Alert Badge -->
+                            <div id="phoneAlert" class="hidden my-6 p-5 rounded-3xl shadow-2xl fade-in">
+                                <div class="flex items-center justify-center gap-3">
+                                    <i id="phoneAlertIcon" class="text-2xl text-white"></i>
+                                    <div class="text-center">
+                                        <div id="phoneAlertTitle" class="text-xl font-bold text-white"></div>
+                                        <div id="phoneAlertConf" class="text-sm text-white/80 mt-1"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Call Actions -->
+                            <div class="flex justify-center items-center gap-6">
+                                <button onclick="clearAll()"
+                                    class="w-16 h-16 rounded-full bg-red-500/20 border border-red-500/50 hover:bg-red-500/30 flex items-center justify-center shadow-lg transition-all duration-300">
+                                    <i class="fas fa-times text-red-400 text-xl"></i>
+                                </button>
+                                <button id="phoneAnalyzeBtn" onclick="analyzeFromPhone()"
+                                    class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 hover:opacity-90 flex items-center justify-center shadow-2xl transition-all duration-300">
+                                    <i class="fas fa-search text-white text-2xl"></i>
+                                </button>
+                                <button onclick="acceptCall()"
+                                    class="w-16 h-16 rounded-full bg-green-500/20 border border-green-500/50 hover:bg-green-500/30 flex items-center justify-center shadow-lg transition-all duration-300">
+                                    <i class="fas fa-check text-green-400 text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="lg:col-span-3 fade-in">
+                <div class="card-dark rounded-3xl p-8 shadow-2xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-white">Analyze Transcript</h2>
+                        <div class="flex items-center gap-2 text-sm text-gray-400">
+                            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                            <span>AI Ready</span>
+                        </div>
+                    </div>
+
+                    <!-- Input -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="text-gray-400 text-sm font-medium">Call Transcript</label>
+                        </div>
+                        <textarea
+                            id="transcript"
+                            class="w-full h-56 card-darker border border-gray-800 rounded-2xl p-5 text-white placeholder-gray-600 resize-none focus:outline-none focus:border-gray-700 transition-colors"
+                            placeholder="Enter your call transcript here...
+
+Example: 'Hello, this is calling about your car warranty that expires soon. Press 1 to renew.'"></textarea>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-3 mb-8">
+                        <button
+                            id="analyzeBtn"
+                            onclick="analyzeCall()"
+                            class="flex-1 btn-primary text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300">
+                            <i class="fas fa-search mr-2"></i>
+                            Analyze Call
+                        </button>
+                        <button
+                            onclick="clearAll()"
+                            class="px-8 card-darker hover:bg-gray-900 border border-gray-800 text-white font-semibold py-4 rounded-xl transition-all duration-300">
+                            <i class="fas fa-redo mr-2"></i>
+                            Clear
+                        </button>
+                    </div>
+
+                    <!-- Result -->
+                    <div id="resultBox" class="hidden rounded-2xl p-6 shadow-xl fade-in">
+                        <div class="flex items-start gap-4 mb-4">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center" id="resultIconWrapper">
+                                <i id="resultIcon" class="text-2xl text-white"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div id="resultTitle" class="text-2xl font-bold text-white mb-2"></div>
+                                <div id="resultConf" class="text-white/80 mb-3"></div>
+                                <div class="text-sm text-white/70" id="resultReason"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Examples -->
+                    <div class="mt-8">
+                        <button
+                            onclick="toggleExamples()"
+                            class="text-gray-400 hover:text-gray-300 text-sm font-medium mb-4 transition-colors flex items-center gap-2">
+                            <i class="fas fa-lightbulb"></i>
+                            <span id="exampleToggle">Try Example Transcripts</span>
+                            <i id="exampleArrow" class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div id="examples" class="hidden space-y-2">
+                            <div onclick="useExample('Hello, calling about your car warranty that expires soon. Press 1 to renew.')"
+                                class="card-darker hover:bg-gray-900 border border-gray-800 rounded-xl p-4 cursor-pointer transition-all duration-200">
+                                <div class="text-white font-medium mb-1">Car Warranty Scam</div>
+                                <div class="text-gray-500 text-sm">Typical unsolicited vehicle warranty call</div>
+                            </div>
+                            <div onclick="useExample('Hi mom, just checking in to see how you are doing today.')"
+                                class="card-darker hover:bg-gray-900 border border-gray-800 rounded-xl p-4 cursor-pointer transition-all duration-200">
+                                <div class="text-white font-medium mb-1">Personal Call</div>
+                                <div class="text-gray-500 text-sm">Legitimate family conversation</div>
+                            </div>
+                            <div onclick="useExample('This is Dr. Smith office confirming your appointment tomorrow at 2 PM.')"
+                                class="card-darker hover:bg-gray-900 border border-gray-800 rounded-xl p-4 cursor-pointer transition-all duration-200">
+                                <div class="text-white font-medium mb-1">Doctor Appointment</div>
+                                <div class="text-gray-500 text-sm">Scheduled appointment confirmation</div>
+                            </div>
+                            <div onclick="useExample('Urgent! Your account has been compromised. Call this number immediately.')"
+                                class="card-darker hover:bg-gray-900 border border-gray-800 rounded-xl p-4 cursor-pointer transition-all duration-200">
+                                <div class="text-white font-medium mb-1">Account Scam</div>
+                                <div class="text-gray-500 text-sm">Fake security threat call</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="card-dark rounded-2xl p-6 mt-6 shadow-xl">
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-white mb-1">100%</div>
+                            <div class="text-gray-500 text-sm">Accuracy</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-white mb-1">&lt;3s</div>
+                            <div class="text-gray-500 text-sm">Response Time</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-white mb-1">AI</div>
+                            <div class="text-gray-500 text-sm">Powered</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center mt-16 text-gray-600 text-sm">
+            <p>Powered by Gemma 3 AI • Built with FastAPI</p>
+        </footer>
+    </div>
+
+    <script>
+        // Clear function
+        function clearAll() {
+            document.getElementById('transcript').value = '';
+            document.getElementById('resultBox').classList.add('hidden');
+            document.getElementById('phoneAlert').classList.add('hidden');
+        }
+
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('time').textContent =
+                now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+        }
+        updateTime();
+        setInterval(updateTime, 60000);
+
+        function toggleExamples() {
+            const examples = document.getElementById('examples');
+            const arrow = document.getElementById('exampleArrow');
+            examples.classList.toggle('hidden');
+            arrow.className = examples.classList.contains('hidden')
+                ? 'fas fa-chevron-down text-xs'
+                : 'fas fa-chevron-up text-xs';
+        }
+
+        function useExample(text) {
+            document.getElementById('transcript').value = text;
+            document.getElementById('examples').classList.add('hidden');
+            document.getElementById('exampleArrow').className = 'fas fa-chevron-down text-xs';
+        }
+
+        function acceptCall() {
+            alert('Call accepted - Simulation mode');
+        }
+
+        function analyzeFromPhone() {
+            const transcript = document.getElementById('transcript').value.trim();
+            if (!transcript) {
+                alert('Please enter a transcript in the control panel first');
+                return;
+            }
+            analyzeCall();
+        }
+
+        async function analyzeCall() {
+            const transcript = document.getElementById('transcript').value.trim();
+            if (!transcript) {
+                alert('Please enter a call transcript');
+                return;
+            }
+
+            const resultBox = document.getElementById('resultBox');
+            const phoneAlert = document.getElementById('phoneAlert');
+            const btn = document.getElementById('analyzeBtn');
+            const phoneBtn = document.getElementById('phoneAnalyzeBtn');
+
+            // Loading state
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Analyzing...';
+            btn.disabled = true;
+            phoneBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-white text-2xl"></i>';
+            phoneBtn.disabled = true;
+
+            try {
+                const response = await fetch('/detect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ transcript })
+                });
+
+                if (!response.ok) throw new Error('Detection failed');
+
+                const result = await response.json();
+
+                // Update result box
+                resultBox.classList.remove('hidden');
+
+                if (result.is_spam) {
+                    resultBox.className = 'alert-danger rounded-2xl p-6 shadow-xl fade-in';
+                    document.getElementById('resultIconWrapper').className = 'w-12 h-12 rounded-full flex items-center justify-center bg-red-500/20';
+                    document.getElementById('resultIcon').className = 'fas fa-exclamation-triangle text-2xl text-white';
+                    document.getElementById('resultTitle').textContent = 'Spam Detected';
+                } else {
+                    resultBox.className = 'alert-success rounded-2xl p-6 shadow-xl fade-in';
+                    document.getElementById('resultIconWrapper').className = 'w-12 h-12 rounded-full flex items-center justify-center bg-green-500/20';
+                    document.getElementById('resultIcon').className = 'fas fa-check-circle text-2xl text-white';
+                    document.getElementById('resultTitle').textContent = 'Legitimate Call';
+                }
+
+                document.getElementById('resultConf').textContent = `${result.confidence.toFixed(1)}% Confidence`;
+                document.getElementById('resultReason').textContent = result.reasoning;
+
+                // Update phone alert
+                phoneAlert.classList.remove('hidden');
+
+                if (result.is_spam) {
+                    phoneAlert.className = 'my-6 p-5 rounded-3xl shadow-2xl fade-in alert-danger';
+                    document.getElementById('phoneAlertIcon').className = 'fas fa-exclamation-triangle text-2xl text-white';
+                    document.getElementById('phoneAlertTitle').textContent = 'SPAM';
+                } else {
+                    phoneAlert.className = 'my-6 p-5 rounded-3xl shadow-2xl fade-in alert-success';
+                    document.getElementById('phoneAlertIcon').className = 'fas fa-shield-check text-2xl text-white';
+                    document.getElementById('phoneAlertTitle').textContent = 'SAFE';
+                }
+
+                document.getElementById('phoneAlertConf').textContent = `${result.confidence.toFixed(1)}% confidence`;
+
+            } catch (error) {
+                alert('Error: ' + error.message + '\n\nMake sure the backend server is running.');
+            } finally {
+                btn.innerHTML = '<i class="fas fa-search mr-2"></i>Analyze Call';
+                btn.disabled = false;
+                phoneBtn.innerHTML = '<i class="fas fa-search text-white text-2xl"></i>';
+                phoneBtn.disabled = false;
+            }
+        }
+
+        // Keyboard shortcut
+        document.getElementById('transcript').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                analyzeCall();
+            }
+        });
+    </script>
+</body>
+</html>
